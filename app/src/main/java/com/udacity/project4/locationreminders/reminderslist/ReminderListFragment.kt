@@ -3,20 +3,30 @@ package com.udacity.project4.locationreminders.reminderslist
 import android.os.Bundle
 import android.view.*
 import androidx.core.view.MenuProvider
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
+import com.udacity.project4.utils.AuthenticationState
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
 
 class ReminderListFragment : BaseFragment() {
     //use Koin to retrieve the ViewModel instance
     override val _viewModel: RemindersListViewModel by viewModel()
     private val binding: FragmentRemindersBinding by lazy {
         FragmentRemindersBinding.inflate(layoutInflater)
+    }
+
+    private val signInLauncher = registerForActivityResult(
+        FirebaseAuthUIActivityResultContract()
+    ) { result ->
+        println(result.resultCode)
     }
 
     override fun onCreateView(
@@ -27,18 +37,54 @@ class ReminderListFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.viewModel = _viewModel
-        binding.lifecycleOwner = this
 
         setDisplayHomeAsUpEnabled(false)
         setTitle(getString(R.string.app_name))
 
-        binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
-
         requireActivity().addMenuProvider(reminderListMenu, viewLifecycleOwner)
-        setupRecyclerView()
-        binding.addReminderFAB.setOnClickListener {
-            navigateToAddReminder()
+
+        observeAuthenticationState()
+    }
+
+    private fun observeAuthenticationState() {
+        _viewModel.authenticationState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                AuthenticationState.AUTHENTICATED -> {
+                    setupUserAuthenticatedLayout()
+                }
+                AuthenticationState.UNAUTHENTICATED -> {
+                    requireActivity().removeMenuProvider(reminderListMenu)
+                    setupUnauthenticatedUserLayout()
+                }
+                else -> {
+                    println("else authenticated")
+                }
+            }
+        }
+    }
+
+    private fun setupUnauthenticatedUserLayout() {
+        binding.userAuthenticated.root.visibility = View.GONE
+        binding.userUnauthenticated.run {
+            root.visibility = View.VISIBLE
+            loginButton.setOnClickListener {
+                val signInIntent = AuthUI.getInstance().createSignInIntentBuilder().build()
+                signInLauncher.launch(signInIntent)
+            }
+        }
+    }
+
+    private fun setupUserAuthenticatedLayout() {
+        binding.userUnauthenticated.root.visibility = View.GONE
+        binding.userAuthenticated.run {
+            root.visibility = View.VISIBLE
+            viewModel = _viewModel
+            lifecycleOwner = this@ReminderListFragment
+            refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
+            setupRecyclerView()
+            addReminderFAB.setOnClickListener {
+                navigateToAddReminder()
+            }
         }
     }
 
@@ -62,7 +108,7 @@ class ReminderListFragment : BaseFragment() {
         }
 
 //        setup the recycler view using the extension function
-        binding.reminderssRecyclerView.setup(adapter)
+        binding.userAuthenticated.reminderssRecyclerView.setup(adapter)
     }
 
     private val reminderListMenu = object : MenuProvider {
