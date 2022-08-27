@@ -1,17 +1,23 @@
 package com.udacity.project4.locationreminders
 
+import android.Manifest
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.udacity.project4.R
 import com.udacity.project4.databinding.ActivityRemindersBinding
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.utils.AuthenticationState
+import com.udacity.project4.utils.LOCATION_PERMISSION_REQUEST_CODE
+import com.udacity.project4.utils.PermissionUtils.isPermissionGranted
+import com.udacity.project4.utils.enableMyLocation
+import com.udacity.project4.utils.permissionDenied
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class RemindersActivity : AppCompatActivity() {
+class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
 
     private val binding: ActivityRemindersBinding by lazy {
         ActivityRemindersBinding.inflate(layoutInflater)
@@ -25,6 +31,7 @@ class RemindersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         observeAuthenticationState()
+        enableMyLocation()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -50,6 +57,35 @@ class RemindersActivity : AppCompatActivity() {
                     println("else authenticated")
                 }
             }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+            super.onRequestPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+            )
+            return
+        }
+
+        if (isPermissionGranted(
+                permissions,
+                grantResults,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
+            // Enable the my location layer if the permission has been granted.
+            enableMyLocation()
+        } else {
+            // Permission was denied. Display an error message
+            // Display the missing permission error dialog when the fragments resume.
+            permissionDenied = true
         }
     }
 }
