@@ -3,10 +3,8 @@ package com.udacity.project4.utils
 import android.Manifest.permission
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -27,7 +25,7 @@ fun AppCompatActivity.enableMyLocation() {
         return
     }
 
-    // 2. If if a permission rationale dialog should be shown
+    // 2. If a permission rationale dialog should be shown
     if (ActivityCompat.shouldShowRequestPermissionRationale(
             this,
             permission.ACCESS_FINE_LOCATION
@@ -51,41 +49,6 @@ fun AppCompatActivity.enableMyLocation() {
 }
 
 object PermissionUtils {
-
-    /**
-     * Requests the fine and coarse location permissions. If a rationale with an additional
-     * explanation should be shown to the user, displays a dialog that triggers the request.
-     */
-    fun requestLocationPermissions(
-        activity: AppCompatActivity,
-        requestId: Int,
-        finishActivity: Boolean
-    ) {
-        if (
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                activity,
-                permission.ACCESS_FINE_LOCATION
-            ) ||
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                activity,
-                permission.ACCESS_COARSE_LOCATION
-            )
-        ) {
-            // Display a dialog with rationale.
-            RationaleDialog.newInstance(requestId, finishActivity)
-                .show(activity.supportFragmentManager, "dialog")
-        } else {
-            // Location permission has not been granted yet, request it.
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(
-                    permission.ACCESS_FINE_LOCATION,
-                    permission.ACCESS_COARSE_LOCATION
-                ),
-                requestId
-            )
-        }
-    }
 
     /**
      * Checks if the result contains a [PackageManager.PERMISSION_GRANTED] result for a
@@ -118,17 +81,6 @@ object PermissionUtils {
                 .setMessage(R.string.location_permission_denied)
                 .setPositiveButton(android.R.string.ok, null)
                 .create()
-        }
-
-        override fun onDismiss(dialog: DialogInterface) {
-            super.onDismiss(dialog)
-            if (finishActivity) {
-                Toast.makeText(
-                    activity, R.string.permission_required_toast,
-                    Toast.LENGTH_SHORT
-                ).show()
-                activity?.finish()
-            }
         }
 
         companion object {
@@ -182,18 +134,6 @@ object PermissionUtils {
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
-        }
-
-        override fun onDismiss(dialog: DialogInterface) {
-            super.onDismiss(dialog)
-            if (finishActivity) {
-                Toast.makeText(
-                    activity,
-                    R.string.permission_required_toast,
-                    Toast.LENGTH_SHORT
-                ).show()
-                activity?.finish()
-            }
         }
 
         companion object {

@@ -80,11 +80,8 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
         ) {
-            // Enable the my location layer if the permission has been granted.
             enableMyLocation()
         } else {
-            // Permission was denied. Display an error message
-            // Display the missing permission error dialog when the fragments resume.
             permissionDenied = true
         }
     }

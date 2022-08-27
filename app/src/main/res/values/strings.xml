@@ -44,6 +44,5 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="welcome_message">Welcome to the location reminder app</string>
     <string name="location_permission_denied">You need to provide location permission</string>
-    <string name="permission_required_toast">Permission Required</string>
-    <string name="permission_rationale_location">Please give permission to location</string>
+    <string name="permission_rationale_location">Location permission is important for app functionality to work</string>
 </resources>
