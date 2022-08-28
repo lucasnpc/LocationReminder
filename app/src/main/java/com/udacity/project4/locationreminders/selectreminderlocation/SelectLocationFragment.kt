@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
@@ -82,6 +83,17 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
         location?.let {
             showUserCurrentPosition(it)
         }
+        setMapStyle(map)
+    }
+
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style)
+            )
+        } catch (e: Exception) {
+            println(e.message)
+        }
     }
 
     private val selectedReminderMenu = object : MenuProvider {
@@ -89,29 +101,31 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
             menuInflater.inflate(R.menu.map_options, menu)
         }
 
-        override fun onMenuItemSelected(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
-            // TODO: Change the map type based on the user's selection.
-            R.id.normal_map -> {
-                true
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            if (!::map.isInitialized) return false
+            when (menuItem.itemId) {
+                R.id.normal_map -> {
+                    map.mapType = GoogleMap.MAP_TYPE_NORMAL
+                    return true
+                }
+                R.id.hybrid_map -> {
+                    map.mapType = GoogleMap.MAP_TYPE_HYBRID
+                    return true
+                }
+                R.id.satellite_map -> {
+                    map.mapType = GoogleMap.MAP_TYPE_SATELLITE
+                    return true
+                }
+                R.id.terrain_map -> {
+                    map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+                    return true
+                }
+                else -> return false
             }
-            R.id.hybrid_map -> {
-                true
-            }
-            R.id.satellite_map -> {
-                true
-            }
-            R.id.terrain_map -> {
-                true
-            }
-            else -> false
         }
     }
 
-    override fun onLocationChanged(location: Location) {
-        if (::map.isInitialized) {
-            showUserCurrentPosition(location)
-        }
-    }
+    override fun onLocationChanged(location: Location) {}
 
     private fun showUserCurrentPosition(location: Location) {
         val userLatLng = LatLng(location.latitude, location.longitude)
