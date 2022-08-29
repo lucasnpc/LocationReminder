@@ -45,4 +45,6 @@
     <string name="welcome_message">Welcome to the location reminder app</string>
     <string name="location_permission_denied">You need to provide location permission</string>
     <string name="permission_rationale_location">Location permission is important for app functionality to work</string>
+    <string name="ask_poi">Select a Point of Interest to remind</string>
+    <string name="poi_format">Lat: %1$.5f, Long: %2$.5f</string>
 </resources>

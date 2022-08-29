@@ -7,6 +7,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.core.location.LocationListenerCompat
 import androidx.core.view.MenuProvider
 import androidx.navigation.fragment.findNavController
@@ -16,10 +17,13 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
+import com.udacity.project4.locationreminders.domain.model.CustomLocation
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.utils.LOCATION_SELECTED_KEY
 import com.udacity.project4.utils.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import com.udacity.project4.utils.permissionDenied
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
@@ -39,11 +43,11 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
     private val location by lazy {
         locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
     }
+    private var customLocation: CustomLocation? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View = binding.root
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -59,22 +63,27 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
         requireActivity().addMenuProvider(selectedReminderMenu, viewLifecycleOwner)
         setDisplayHomeAsUpEnabled(true)
 
-//        TODO: add style to the map
-//        TODO: put a marker to location that the user selected
-
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0f, this)
 
-//        TODO: call this function after the user confirms on the selected location
-        onLocationSelected()
+        binding.saveLocation.setOnClickListener {
+            customLocation?.let { customLocation ->
+                findNavController().apply {
+                    previousBackStackEntry?.savedStateHandle?.set(
+                        LOCATION_SELECTED_KEY,
+                        customLocation
+                    )
+                    popBackStack()
+                }
+            } ?: Toast.makeText(requireContext(), getString(R.string.ask_poi), Toast.LENGTH_SHORT)
+                .show()
+        }
     }
 
-    private fun onLocationSelected() {
-        //        TODO: When the user confirms on the selected location,
-        //         send back the selected location details to the view model
-        //         and navigate back to the previous fragment to save the reminder and add the geofence
+    private fun onLocationSelected(location: CustomLocation) {
+        customLocation = location
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -83,16 +92,50 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
         location?.let {
             showUserCurrentPosition(it)
         }
-        setMapStyle(map)
+        map.run {
+            setMapStyle()
+            setPoiClick()
+            setMapLongClick()
+            setMapMarkerClick()
+        }
     }
 
-    private fun setMapStyle(map: GoogleMap) {
+    private fun GoogleMap.setMapMarkerClick() {
+        this.setOnMarkerClickListener { marker ->
+            onLocationSelected(
+                CustomLocation(
+                    name = marker.title ?: "",
+                    position = marker.position
+                )
+            )
+            false
+        }
+    }
+
+    private fun GoogleMap.setMapStyle() {
         try {
-            map.setMapStyle(
+            this.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style)
             )
         } catch (e: Exception) {
             println(e.message)
+        }
+    }
+
+    private fun GoogleMap.setPoiClick() {
+        this.setOnPoiClickListener { poi ->
+            this.addMarker(
+                MarkerOptions().position(poi.latLng).title(poi.name)
+            )?.showInfoWindow()
+            onLocationSelected(CustomLocation(poi.name, poi.latLng))
+        }
+    }
+
+    private fun GoogleMap.setMapLongClick() {
+        this.setOnMapLongClickListener { latlng ->
+            this.addMarker(
+                MarkerOptions().position(latlng).title(getString(R.string.dropped_pin))
+            )
         }
     }
 
