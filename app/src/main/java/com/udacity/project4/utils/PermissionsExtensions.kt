@@ -4,7 +4,9 @@ import android.Manifest.permission
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -14,9 +16,9 @@ import com.udacity.project4.R
 const val LOCATION_PERMISSION_REQUEST_CODE = 1
 var permissionDenied: Boolean = false
 
+@RequiresApi(Build.VERSION_CODES.Q)
 fun AppCompatActivity.enableMyLocation() {
 
-    // 1. Check if permissions are granted, if so, enable the my location layer
     if (ContextCompat.checkSelfPermission(
             this,
             permission.ACCESS_FINE_LOCATION
@@ -29,6 +31,9 @@ fun AppCompatActivity.enableMyLocation() {
     if (ActivityCompat.shouldShowRequestPermissionRationale(
             this,
             permission.ACCESS_FINE_LOCATION
+        ) || ActivityCompat.shouldShowRequestPermissionRationale(
+            this,
+            permission.ACCESS_BACKGROUND_LOCATION
         )
     ) {
         PermissionUtils.RationaleDialog.newInstance(
@@ -42,7 +47,8 @@ fun AppCompatActivity.enableMyLocation() {
         this,
         arrayOf(
             permission.ACCESS_FINE_LOCATION,
-            permission.ACCESS_COARSE_LOCATION
+            permission.ACCESS_COARSE_LOCATION,
+            permission.ACCESS_BACKGROUND_LOCATION
         ),
         LOCATION_PERMISSION_REQUEST_CODE
     )
@@ -113,6 +119,8 @@ object PermissionUtils {
      */
     class RationaleDialog : DialogFragment() {
         private var finishActivity = false
+
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             val requestCode =
                 arguments?.getInt(ARGUMENT_PERMISSION_REQUEST_CODE) ?: 0
@@ -125,7 +133,8 @@ object PermissionUtils {
                         requireActivity(),
                         arrayOf(
                             permission.ACCESS_FINE_LOCATION,
-                            permission.ACCESS_COARSE_LOCATION
+                            permission.ACCESS_COARSE_LOCATION,
+                            permission.ACCESS_BACKGROUND_LOCATION
                         ),
                         requestCode
                     )
