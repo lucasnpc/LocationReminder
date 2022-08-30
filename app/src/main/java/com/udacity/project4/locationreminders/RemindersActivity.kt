@@ -1,13 +1,14 @@
 package com.udacity.project4.locationreminders
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import com.udacity.project4.R
+import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.databinding.ActivityRemindersBinding
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.utils.AuthenticationState
@@ -31,7 +32,6 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         observeAuthenticationState()
-        enableMyLocation()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -47,11 +47,9 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
     private fun observeAuthenticationState() {
         _viewModel.authenticationState.observe(this) { state ->
             when (state) {
-                AuthenticationState.AUTHENTICATED -> {
-                    navController.navigate(R.id.reminderListFragment)
-                }
                 AuthenticationState.UNAUTHENTICATED -> {
-                    navController.navigate(R.id.loginFragment)
+                    startActivity(Intent(this, AuthenticationActivity::class.java))
+                    finish()
                 }
                 else -> {
                     println("else authenticated")
