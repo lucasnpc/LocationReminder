@@ -18,30 +18,8 @@ import com.udacity.project4.utils.ACTION_GEOFENCE_EVENT
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_GEOFENCE_EVENT) {
-            println("blabla entrou")
+            GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
         }
-//
-//            val geofencingEvent = GeofencingEvent.fromIntent(intent)
-//            if (geofencingEvent?.hasError() == true) {
-//                val errorMessage = GeofenceStatusCodes
-//                    .getStatusCodeString(geofencingEvent.errorCode)
-//                Log.e(TAG, errorMessage)
-//                return
-//            }
-//
-//            val geofenceTransition = geofencingEvent?.geofenceTransition
-//
-//            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-//
-//                val triggeringGeofences = geofencingEvent.triggeringGeofences
-//
-//                val geofence = triggeringGeofences?.get(0)?.requestId
-//
-//                geofence?.let {
-//                    println("blabla $it")
-//                }
-//            }
-//        }
     }
 
     private companion object {

@@ -44,6 +44,10 @@ class ReminderListFragment : BaseFragment() {
             }
         }
         requireActivity().addMenuProvider(reminderListMenu, viewLifecycleOwner)
+        _viewModel.showLoading.observe(viewLifecycleOwner) {
+            binding.refreshLayout.isRefreshing = it
+            binding.progressBar.visibility = if (it) View.VISIBLE else View.GONE
+        }
     }
 
 

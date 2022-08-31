@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
@@ -27,7 +26,6 @@ import com.udacity.project4.locationreminders.reminderslist.RemindersListViewMod
 import com.udacity.project4.utils.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-@RequiresApi(Build.VERSION_CODES.M)
 class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
 
     private val binding: ActivityRemindersBinding by lazy {
@@ -48,7 +46,9 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
             this,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            else PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
@@ -111,7 +111,7 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
                             reminderItem.longitude ?: 0f.toDouble(),
                             GEOFENCE_RADIUS_IN_METERS
                         )
-                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                         .setExpirationDuration(GEOFENCE_EXPIRATION)
                         .build()
                 )
