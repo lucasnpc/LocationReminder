@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.reminderslist
 
 import android.app.Application
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,7 @@ class RemindersListViewModel(
 ) : BaseViewModel(app) {
     // list that holds the reminder data to be displayed on the UI
     val remindersList = MutableLiveData<List<ReminderDataItem>>()
+    val reminderListLiveDataItem: LiveData<List<ReminderDataItem>> = remindersList
 
     val authenticationState = FirebaseUserLiveData().map { user ->
         if (user != null) {
@@ -25,6 +27,10 @@ class RemindersListViewModel(
         } else {
             AuthenticationState.UNAUTHENTICATED
         }
+    }
+
+    init {
+        loadReminders()
     }
 
     /**

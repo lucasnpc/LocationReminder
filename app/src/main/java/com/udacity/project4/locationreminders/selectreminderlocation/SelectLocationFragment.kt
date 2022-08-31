@@ -40,9 +40,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
     private val locationManager by lazy {
         requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
-    private val location by lazy {
-        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-    }
     private var customLocation: CustomLocation? = null
 
     override fun onCreateView(
@@ -89,9 +86,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         map.isMyLocationEnabled = true
-        location?.let {
+        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let {
             showUserCurrentPosition(it)
         }
+
         map.run {
             setMapStyle()
             setPoiClick()
@@ -170,10 +168,16 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback, LocationListe
 
     override fun onLocationChanged(location: Location) {}
 
-    private fun showUserCurrentPosition(location: Location) {
-        val userLatLng = LatLng(location.latitude, location.longitude)
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_LEVEL))
-    }
+    private fun showUserCurrentPosition(location: Location) =
+        map.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                LatLng(
+                    location.latitude,
+                    location.longitude
+                ), ZOOM_LEVEL
+            )
+        )
+
 
     private companion object {
         const val ZOOM_LEVEL = 15f

@@ -47,12 +47,6 @@ class ReminderListFragment : BaseFragment() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        //load the reminders list on the ui
-        _viewModel.loadReminders()
-    }
-
     private fun navigateToAddReminder() {
         //use the navigationCommand live data to navigate between the fragments
         _viewModel.navigationCommand.postValue(
