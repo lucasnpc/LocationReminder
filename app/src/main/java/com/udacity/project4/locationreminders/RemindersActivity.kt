@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
@@ -23,6 +24,7 @@ import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.databinding.ActivityRemindersBinding
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
+import com.udacity.project4.login.AuthenticationViewModel
 import com.udacity.project4.utils.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -32,6 +34,7 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
         ActivityRemindersBinding.inflate(layoutInflater)
     }
     private val _viewModel: RemindersListViewModel by viewModel()
+    private val authViewModel: AuthenticationViewModel by viewModels()
     private val navController: NavController by lazy {
         binding.navHostFragment.findNavController()
     }
@@ -156,7 +159,7 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
     }
 
     private fun observeAuthenticationState() {
-        _viewModel.authenticationState.observe(this) { state ->
+        authViewModel.authenticationState.observe(this) { state ->
             when (state) {
                 AuthenticationState.UNAUTHENTICATED -> {
                     startActivity(Intent(this, AuthenticationActivity::class.java))
