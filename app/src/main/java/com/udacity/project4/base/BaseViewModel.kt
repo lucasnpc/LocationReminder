@@ -1,5 +1,6 @@
 package com.udacity.project4.base
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.udacity.project4.utils.SingleLiveEvent
@@ -13,7 +14,8 @@ abstract class BaseViewModel : ViewModel() {
     val showErrorMessage: SingleLiveEvent<String> = SingleLiveEvent()
     val showSnackBar: SingleLiveEvent<String> = SingleLiveEvent()
     val showSnackBarInt: SingleLiveEvent<Int> = SingleLiveEvent()
-    val showToast: SingleLiveEvent<String> = SingleLiveEvent()
+    @StringRes
+    val showToast: SingleLiveEvent<Int> = SingleLiveEvent()
     val showLoading: SingleLiveEvent<Boolean> = SingleLiveEvent()
     val showNoData: MutableLiveData<Boolean> = MutableLiveData()
 

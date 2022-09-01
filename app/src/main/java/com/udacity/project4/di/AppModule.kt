@@ -21,7 +21,6 @@ object AppModule {
         single {
             //This view model is declared singleton to be used across multiple fragments
             SaveReminderViewModel(
-                get(),
                 get() as ReminderDataSource
             )
         }
