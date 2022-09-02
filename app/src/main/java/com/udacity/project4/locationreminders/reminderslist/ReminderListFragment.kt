@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.reminderslist
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.core.view.MenuProvider
 import com.firebase.ui.auth.AuthUI

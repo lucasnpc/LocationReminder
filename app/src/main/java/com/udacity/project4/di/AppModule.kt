@@ -1,6 +1,7 @@
 package com.udacity.project4.di
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -10,6 +11,10 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 object AppModule {
+    @Volatile
+    var reminderRepository: ReminderDataSource? = null
+        @VisibleForTesting set
+
     fun getModules(context: Context) = module {
         //Declare a ViewModel - be later inject into Fragment with dedicated injector using by viewModel()
         viewModel {
@@ -24,7 +29,10 @@ object AppModule {
                 get() as ReminderDataSource
             )
         }
-        single { RemindersLocalRepository(get()) as ReminderDataSource }
+        single {
+            reminderRepository?.let { it as ReminderDataSource }
+                ?: RemindersLocalRepository(get()) as ReminderDataSource
+        }
         single { LocalDB.createRemindersDao(context) }
     }
 }
