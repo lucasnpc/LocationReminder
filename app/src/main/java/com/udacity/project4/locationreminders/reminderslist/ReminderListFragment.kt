@@ -44,6 +44,7 @@ class ReminderListFragment : BaseFragment() {
                 navigateToAddReminder()
             }
         }
+        _viewModel.loadReminders()
         requireActivity().addMenuProvider(reminderListMenu, viewLifecycleOwner)
         _viewModel.showLoading.observe(viewLifecycleOwner) {
             binding.refreshLayout.isRefreshing = it
