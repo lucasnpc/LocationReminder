@@ -32,7 +32,7 @@ object AppModule {
             )
         }
         single {
-            reminderRepository?.let { it as ReminderDataSource }
+            reminderRepository
                 ?: RemindersLocalRepository(get()) as ReminderDataSource
         }
         single { LocalDB.createRemindersDao(context) }
