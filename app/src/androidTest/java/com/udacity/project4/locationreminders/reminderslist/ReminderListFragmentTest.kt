@@ -36,7 +36,7 @@ class ReminderListFragmentTest {
     fun initRepository() = runBlockingTest {
         repository = FakeDataSource()
         AppModule.reminderRepository = repository
-        ('A'..'Z').forEach {
+        ('A'..'D').forEach {
             repository.saveReminder(
                 ReminderDTO(
                     title = it.toString(),

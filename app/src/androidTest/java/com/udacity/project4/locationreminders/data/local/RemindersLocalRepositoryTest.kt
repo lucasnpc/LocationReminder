@@ -10,9 +10,8 @@ import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.core.Is.`is`
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -25,6 +24,52 @@ import org.junit.runner.RunWith
 @MediumTest
 class RemindersLocalRepositoryTest {
 
-//    TODO: Add testing implementation to the RemindersLocalRepository.kt
+    private lateinit var localRepository: RemindersLocalRepository
+    private lateinit var database: RemindersDatabase
+    private val reminder = ReminderDTO(
+        title = "title",
+        description = "description",
+        location = "location",
+        latitude = 0.0,
+        longitude = 0.0
+    )
+
+    @get:Rule
+    var instantExecutorRule = InstantTaskExecutorRule()
+
+    @Before
+    fun setup() {
+        database = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RemindersDatabase::class.java
+        ).allowMainThreadQueries().build()
+        localRepository = RemindersLocalRepository(database.reminderDao(), Dispatchers.Main)
+    }
+
+    @After
+    fun cleanUp() {
+        database.close()
+    }
+
+    @Test
+    fun saveReminder_getReminders() = runBlocking {
+        localRepository.saveReminder(
+            reminder
+        )
+
+        val result: Result<ReminderDTO> = localRepository.getReminder(reminder.id)
+
+        assertThat(result, `is`(Result.Success(reminder)))
+        result as Result.Success
+        assertThat(result.data.title, `is`(reminder.title))
+        assertThat(result.data.location, `is`(reminder.location))
+    }
+
+    @Test
+    fun getReminderThatDoesntExist() = runBlocking {
+        val result = localRepository.getReminder("123321")
+
+        assertThat(result, `is`(Result.Error("Reminder not found!")))
+    }
 
 }
