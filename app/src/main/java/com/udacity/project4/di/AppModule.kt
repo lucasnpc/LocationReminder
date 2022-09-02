@@ -11,6 +11,8 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 object AppModule {
+    private val lock = Any()
+
     @Volatile
     var reminderRepository: ReminderDataSource? = null
         @VisibleForTesting set
@@ -34,5 +36,12 @@ object AppModule {
                 ?: RemindersLocalRepository(get()) as ReminderDataSource
         }
         single { LocalDB.createRemindersDao(context) }
+    }
+
+    @VisibleForTesting
+    fun resetRepository() {
+        synchronized(lock) {
+            reminderRepository = null
+        }
     }
 }

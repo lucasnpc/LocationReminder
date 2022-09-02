@@ -7,7 +7,6 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +18,7 @@ import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,23 +33,9 @@ class ReminderListFragmentTest {
     private lateinit var repository: ReminderDataSource
 
     @Before
-    fun initRepository() {
+    fun initRepository() = runBlockingTest {
         repository = FakeDataSource()
         AppModule.reminderRepository = repository
-    }
-
-    @Test
-    fun testingNoDataState() {
-        val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
-        scenario.onFragment {
-
-        }
-
-        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
-    }
-
-    @Test
-    fun testingReminderDateState() = runBlockingTest {
         ('A'..'Z').forEach {
             repository.saveReminder(
                 ReminderDTO(
@@ -61,16 +47,11 @@ class ReminderListFragmentTest {
                 )
             )
         }
+    }
 
-        launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
-
-        ('A'..'Z').forEach {
-            onView(withId(R.id.reminderssRecyclerView)).perform(
-                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
-                    hasDescendant(withText(it.toString())), click()
-                )
-            )
-        }
+    @After
+    fun resetRepository() = runBlockingTest {
+        AppModule.resetRepository()
     }
 
     @Test
@@ -84,6 +65,19 @@ class ReminderListFragmentTest {
         onView(withId(R.id.addReminderFAB)).perform(click())
 
         verify(navController).navigate(ReminderListFragmentDirections.toSaveReminder())
+    }
+
+    @Test
+    fun testingReminderDateState() = runBlockingTest {
+        launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
+
+        ('A'..'D').forEach {
+            onView(withId(R.id.reminderssRecyclerView)).perform(
+                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
+                    hasDescendant(withText(it.toString())), click()
+                )
+            )
+        }
     }
 //    TODO: add testing for the error messages.
 }
