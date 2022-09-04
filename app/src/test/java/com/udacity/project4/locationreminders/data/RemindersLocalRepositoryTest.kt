@@ -4,6 +4,7 @@ import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.test.runBlockingTest
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.IsEqual
 import org.junit.After
@@ -24,7 +25,7 @@ class RemindersLocalRepositoryTest {
     @Before
     fun setUp() = mainCoroutineRule.runBlockingTest {
         repository = FakeDataSource()
-        ('A'..'Z').forEach { letter ->
+        ('A'..'D').forEach { letter ->
             reminders.add(
                 ReminderDTO(
                     title = "title $letter",
@@ -53,6 +54,21 @@ class RemindersLocalRepositoryTest {
 
         assertThat(_reminders.data, IsEqual(reminders))
     }
+
+    @Test
+    fun `Should return the reminder from Id`() = mainCoroutineRule.runBlockingTest {
+        val reminder = repository.getReminder(reminders[0].id) as Result.Success
+
+        assertThat(reminder.data, IsEqual(reminders[0]))
+    }
+
+    @Test
+    fun `Should return error when dont find a reminder from Id`() =
+        mainCoroutineRule.runBlockingTest {
+            val reminder = repository.getReminder("123")
+
+            assertThat(reminder, `is`(Result.Error(null)))
+        }
 
     @Test
     fun `Should return empty List when all reminders are clear`() =

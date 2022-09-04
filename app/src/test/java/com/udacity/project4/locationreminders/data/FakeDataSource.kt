@@ -9,22 +9,19 @@ class FakeDataSource(private val reminders: MutableList<ReminderDTO> = mutableLi
     ReminderDataSource {
 
     private var shouldReturnError = false
-    private var shouldReturnNoData = false
 
     fun setReturnError(value: Boolean) {
         shouldReturnError = value
     }
 
-    fun setReturnNoData(value: Boolean) {
-        shouldReturnNoData = value
-    }
-
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
-        if (shouldReturnError)
-            return Result.Error(ErrorMessage)
-        if (shouldReturnNoData)
-            return Result.Success(listOf())
-        return Result.Success(reminders)
+        return try {
+            if (shouldReturnError)
+                throw Exception(ErrorMessage)
+            Result.Success(reminders)
+        } catch (e: Exception) {
+            Result.Error(e.localizedMessage)
+        }
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
@@ -32,7 +29,13 @@ class FakeDataSource(private val reminders: MutableList<ReminderDTO> = mutableLi
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        return Result.Success(reminders.get(index = id.toInt()))
+        return try {
+            if (shouldReturnError)
+                throw Exception(ErrorMessage)
+            return Result.Success(reminders.find { it.id == id }!!)
+        } catch (e: Exception) {
+            Result.Error(e.localizedMessage)
+        }
     }
 
     override suspend fun deleteAllReminders() {

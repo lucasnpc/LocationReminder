@@ -38,7 +38,13 @@ class FakeRepository(private val reminders: MutableList<ReminderDTO> = mutableLi
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        return Result.Success(reminders.get(index = id.toInt()))
+        return try {
+            if (shouldReturnError)
+                throw Exception(ErrorMessage)
+            return Result.Success(reminders.find { it.id == id }!!)
+        } catch (e: Exception) {
+            Result.Error(e.localizedMessage)
+        }
     }
 
     override suspend fun deleteAllReminders() {

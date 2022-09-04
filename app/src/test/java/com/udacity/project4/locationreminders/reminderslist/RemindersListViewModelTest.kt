@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.udacity.project4.locationreminders.ErrorMessage
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -35,21 +36,12 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun `Should return error`() {
+    fun `Should return error message to show while loading reminders`() {
         repository.setReturnError(true)
 
         viewModel.loadReminders()
 
         assertThat(viewModel.showErrorMessage.getOrAwaitValue(), `is`(ErrorMessage))
-    }
-
-    @Test
-    fun `Should return no data`() {
-        repository.setReturnNoData(true)
-
-        viewModel.loadReminders()
-
-        assertThat(viewModel.remindersList.getOrAwaitValue(), `is`(emptyList()))
     }
 
     @Test
