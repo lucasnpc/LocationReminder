@@ -1,14 +1,11 @@
 package com.udacity.project4.locationreminders
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -18,14 +15,15 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.material.snackbar.Snackbar
-import com.udacity.project4.R
 import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.databinding.ActivityRemindersBinding
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.login.AuthenticationViewModel
-import com.udacity.project4.utils.*
+import com.udacity.project4.utils.ACTION_GEOFENCE_EVENT
+import com.udacity.project4.utils.AuthenticationState
+import com.udacity.project4.utils.GEOFENCE_EXPIRATION
+import com.udacity.project4.utils.GEOFENCE_RADIUS_IN_METERS
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
@@ -54,45 +52,6 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
             else PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
-
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        when {
-            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    backgroundLocationPermissionRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                }
-            }
-            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    backgroundLocationPermissionRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                }
-            }
-            else -> {
-                permissionDenied = true
-                Snackbar.make(
-                    binding.reminderMain,
-                    R.string.permission_denied_explanation,
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
-    private val backgroundLocationPermissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted)
-                observeReminderList()
-            else {
-                permissionDenied = true
-                Snackbar.make(
-                    binding.reminderMain,
-                    R.string.background_permission_denied_explanation,
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -170,35 +129,16 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
         }
     }
 
-    private fun foregroundAndBackgroundLocationPermissionApproved(): Boolean {
-        val foregroundLocationApproved = (
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ))
-        val backgroundPermissionApproved =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        )
-            else
-                true
-
-        return foregroundLocationApproved && backgroundPermissionApproved
-    }
-
     private fun requestForegroundAndBackgroundLocationPermissions() {
-        if (foregroundAndBackgroundLocationPermissionApproved()) {
-            observeReminderList()
-            return
-        }
-        locationPermissionRequest.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-            )
-        )
+//        if (foregroundAndBackgroundLocationPermissionApproved()) {
+//            observeReminderList()
+//            return
+//        }
+//        locationPermissionRequest.launch(
+//            arrayOf(
+//                Manifest.permission.ACCESS_FINE_LOCATION,
+//                Manifest.permission.ACCESS_COARSE_LOCATION,
+//            )
+//        )
     }
 }

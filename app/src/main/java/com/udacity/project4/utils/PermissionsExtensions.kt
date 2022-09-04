@@ -3,18 +3,45 @@ package com.udacity.project4.utils
 import android.Manifest.permission
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
 import com.udacity.project4.R
 
 const val LOCATION_PERMISSION_REQUEST_CODE = 1
 var permissionDenied: Boolean = false
+
+fun FragmentActivity.foregroundAndBackgroundLocationPermissionApproved(): Boolean {
+    val foregroundLocationApproved = (
+            PackageManager.PERMISSION_GRANTED ==
+                    ActivityCompat.checkSelfPermission(
+                        this,
+                        permission.ACCESS_FINE_LOCATION
+                    ))
+    val backgroundPermissionApproved =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            PackageManager.PERMISSION_GRANTED ==
+                    ActivityCompat.checkSelfPermission(
+                        this, permission.ACCESS_BACKGROUND_LOCATION
+                    )
+        else
+            true
+
+    return foregroundLocationApproved && backgroundPermissionApproved
+}
 
 @RequiresApi(Build.VERSION_CODES.Q)
 fun AppCompatActivity.enableMyLocation() {
@@ -47,8 +74,7 @@ fun AppCompatActivity.enableMyLocation() {
         this,
         arrayOf(
             permission.ACCESS_FINE_LOCATION,
-            permission.ACCESS_COARSE_LOCATION,
-            permission.ACCESS_BACKGROUND_LOCATION
+            permission.ACCESS_COARSE_LOCATION
         ),
         LOCATION_PERMISSION_REQUEST_CODE
     )
@@ -133,8 +159,7 @@ object PermissionUtils {
                         requireActivity(),
                         arrayOf(
                             permission.ACCESS_FINE_LOCATION,
-                            permission.ACCESS_COARSE_LOCATION,
-                            permission.ACCESS_BACKGROUND_LOCATION
+                            permission.ACCESS_COARSE_LOCATION
                         ),
                         requestCode
                     )
