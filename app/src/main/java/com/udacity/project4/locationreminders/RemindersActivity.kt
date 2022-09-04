@@ -57,7 +57,7 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         observeAuthenticationState()
-        requestForegroundAndBackgroundLocationPermissions()
+        observeReminderList()
     }
 
     @SuppressLint("MissingPermission")
@@ -127,18 +127,5 @@ class RemindersActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissio
                 else -> Unit
             }
         }
-    }
-
-    private fun requestForegroundAndBackgroundLocationPermissions() {
-//        if (foregroundAndBackgroundLocationPermissionApproved()) {
-//            observeReminderList()
-//            return
-//        }
-//        locationPermissionRequest.launch(
-//            arrayOf(
-//                Manifest.permission.ACCESS_FINE_LOCATION,
-//                Manifest.permission.ACCESS_COARSE_LOCATION,
-//            )
-//        )
     }
 }

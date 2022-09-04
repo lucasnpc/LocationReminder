@@ -12,12 +12,13 @@ import com.udacity.project4.databinding.FragmentRemindersBinding
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class ReminderListFragment : BaseFragment() {
     //use Koin to retrieve the ViewModel instance
-    override val _viewModel: RemindersListViewModel by viewModel()
+    override val _viewModel: RemindersListViewModel by sharedViewModel()
     private val binding: FragmentRemindersBinding by lazy {
         FragmentRemindersBinding.inflate(layoutInflater)
     }

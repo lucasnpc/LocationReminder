@@ -32,9 +32,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.domain.model.CustomLocation
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.LOCATION_SELECTED_KEY
-import com.udacity.project4.utils.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import com.udacity.project4.utils.foregroundAndBackgroundLocationPermissionApproved
-import com.udacity.project4.utils.permissionDenied
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
@@ -57,11 +55,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        if (permissionDenied) {
-            newInstance(finishActivity = false).show(parentFragmentManager, "dialog")
-            findNavController().popBackStack()
-        }
 
         binding.viewModel = _viewModel
         binding.lifecycleOwner = this
@@ -94,13 +87,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         map = googleMap
         if (requireActivity().foregroundAndBackgroundLocationPermissionApproved()) {
             checkDeviceLocationSettingsAndStartGeofence()
-        } else
-            locationPermissionRequest.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                )
+            return
+        }
+        locationPermissionRequest.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
             )
+        )
     }
 
     private fun enableLocation() {
@@ -160,7 +154,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         this.setOnMapLongClickListener { latlng ->
             this.addMarker(
                 MarkerOptions().position(latlng).title(getString(R.string.dropped_pin))
-            )
+            )?.also {
+                onLocationSelected(CustomLocation(it.title.toString(), it.position))
+            }
         }
     }
 
@@ -208,7 +204,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 }
             }
             else -> {
-                permissionDenied = true
                 Toast.makeText(
                     requireContext(),
                     R.string.permission_denied_explanation,
@@ -223,7 +218,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             if (isGranted)
                 checkDeviceLocationSettingsAndStartGeofence()
             else {
-                permissionDenied = true
                 Toast.makeText(
                     requireContext(),
                     R.string.permission_denied_explanation,
