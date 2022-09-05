@@ -203,7 +203,7 @@ class SaveReminderFragment : BaseFragment() {
                     GEOFENCE_RADIUS_IN_METERS
                 )
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                .setExpirationDuration(GEOFENCE_EXPIRATION)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build()
 
             geofencingClient.addGeofences(getGeofencingRequest(geofence), geofencePendingIntent)

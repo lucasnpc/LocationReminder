@@ -85,6 +85,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        configureMap()
         if (requireActivity().foregroundAndBackgroundLocationPermissionApproved()) {
             checkDeviceLocationSettingsAndStartGeofence()
             return
@@ -97,14 +98,17 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         )
     }
 
-    private fun enableLocation() {
-        map.isMyLocationEnabled = true
+    private fun configureMap() {
         map.run {
             setMapStyle()
             setPoiClick()
             setMapLongClick()
             setMapMarkerClick()
         }
+    }
+
+    private fun enableMapLocation() {
+        map.isMyLocationEnabled = true
         fusedLocationClient.lastLocation.addOnSuccessListener {
             it?.let {
                 map.moveCamera(
@@ -195,12 +199,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         when {
             permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    backgroundLocationPermissionRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    enableMapLocation()
+                    checkDeviceLocationSettingsAndStartGeofence()
                 }
             }
             permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    backgroundLocationPermissionRequest.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    enableMapLocation()
+                    checkDeviceLocationSettingsAndStartGeofence()
                 }
             }
             else -> {
@@ -212,19 +218,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             }
         }
     }
-
-    private val backgroundLocationPermissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted)
-                checkDeviceLocationSettingsAndStartGeofence()
-            else {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.permission_denied_explanation,
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
 
     private val result =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
@@ -267,7 +260,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
         locationSettingsResponseTask.addOnCompleteListener {
             if (it.isSuccessful) {
-                enableLocation()
+                enableMapLocation()
             }
         }
     }
